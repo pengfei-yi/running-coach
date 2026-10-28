@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🏃 跑步训练分析报告 | Phelan</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: #f5f7fa; color: #2d3748; line-height: 1.6;
+}
+.container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white; padding: 32px 24px; border-radius: 16px; margin-bottom: 24px;
+}
+.header h1 { font-size: 28px; margin-bottom: 8px; }
+.header p { opacity: 0.9; font-size: 14px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.stat-card {
+  background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.stat-card .label { font-size: 13px; color: #718096; margin-bottom: 4px; }
+.stat-card .value { font-size: 28px; font-weight: 700; color: #2d3748; }
+.stat-card .sub { font-size: 13px; color: #a0aec0; margin-top: 4px; }
+.chart-card {
+  background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  margin-bottom: 20px;
+}
+.chart-card h3 { font-size: 16px; margin-bottom: 16px; color: #4a5568; }
+.chart-card canvas { width: 100%; max-height: 360px; }
+.prediction-table {
+  width: 100%; border-collapse: collapse; margin-top: 12px;
+}
+.prediction-table th, .prediction-table td {
+  padding: 10px 12px; text-align: left; border-bottom: 1px solid #e2e8f0;
+}
+.prediction-table th { font-size: 12px; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; }
+.prediction-table td { font-size: 15px; }
+.highlight { color: #667eea; font-weight: 600; }
+.footer {
+  text-align: center; padding: 24px; color: #a0aec0; font-size: 13px;
+}
+.summary-text {
+  background: white; border-radius: 12px; padding: 20px 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  margin-bottom: 20px; line-height: 1.8;
+}
+.summary-text strong { color: #667eea; }
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+  <h1>🏃 跑步训练分析报告</h1>
+  <p>Phelan  ·  训练周期: 2026-05-07 → 2026-08-05  ·  报告生成: 2026-08-05T23:26 </p>
+</div>
+
+<div class="grid">
+  <div class="stat-card">
+    <div class="label">总跑量</div>
+    <div class="value">712 <span style="font-size:16px">km</span></div>
+    <div class="sub">67 小时 · 60 次</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">平均配速</div>
+    <div class="value">5:40/km</div>
+    <div class="sub">平均每次 11.9 km</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">CTL 训练体能</div>
+    <div class="value">46</div>
+    <div class="sub">ATL 46 · TSB 0.8238569999999967</div>
+  </div>
+  <div class="stat-card">
+    <div class="label">HRV / 静息心率</div>
+    <div class="value">N/A<span style="font-size:16px">ms</span> <span style="font-size:16px;color:#718096">/ 54</span></div>
+    <div class="sub">当前数值</div>
+  </div>
+</div>
+
+<div class="chart-card">
+  <h3>📈 体能趋势 (CTL / ATL / TSB)</h3>
+  <canvas id="fitnessChart"></canvas>
+</div>
+
+<div class="chart-card">
+  <h3>📊 周跑量统计</h3>
+  <canvas id="weeklyChart"></canvas>
+</div>
+
+<div class="chart-card">
+  <h3>🏁 比赛成绩预测</h3>
+  <table class="prediction-table">
+    <thead><tr><th>距离</th><th>预测完赛时间</th><th>预测配速</th></tr></thead>
+    <tbody>
+<tr><td>5K</td><td class='highlight'>23:04</td><td>4:36/km</td></tr>
+<tr><td>10K</td><td class='highlight'>48:05</td><td>4:48/km</td></tr>
+<tr><td>HALF</td><td class='highlight'>1:46:05</td><td>5:01/km</td></tr>
+<tr><td>MARATHON</td><td class='highlight'>3:41:11</td><td>5:14/km</td></tr>
+
+    </tbody>
+  </table>
+</div>
+
+<div class="chart-card">
+  <h3>🫀 心率区间分布</h3>
+  <canvas id="hrChart"></canvas>
+</div>
+
+<div class="chart-card">
+  <h3>🏃 配速趋势 (最近30次跑步)</h3>
+  <canvas id="paceChart"></canvas>
+</div>
+
+<div class="summary-text">
+  <h3 style="margin-bottom:12px">📝 训练概要</h3>
+  <p>总训练负荷: <strong>4284</strong> (平均每次 71)</p>
+  <p>训练构成 — 轻松跑: <strong>3127</strong> · 质量课: <strong>982</strong> · 长距离: <strong>175</strong></p>
+  <p>心率区间训练时间: 65.3 小时</p>
+</div>
+
+<div class="footer">
+  由 Running Coach Skill 自动生成 · 数据来源: intervals.icu
+</div>
+</div>
+
+<script>
+// ── Fitness Chart ──
+const fitnessCtx = document.getElementById('fitnessChart').getContext('2d');
+new Chart(fitnessCtx, {
+  type: 'line',
+  data: {
+    labels: ["2026-05-07", "2026-05-08", "2026-05-09", "2026-05-10", "2026-05-11", "2026-05-12", "2026-05-13", "2026-05-14", "2026-05-15", "2026-05-16", "2026-05-17", "2026-05-18", "2026-05-19", "2026-05-20", "2026-05-21", "2026-05-22", "2026-05-23", "2026-05-24", "2026-05-25", "2026-05-26", "2026-05-27", "2026-05-28", "2026-05-29", "2026-05-30", "2026-05-31", "2026-06-01", "2026-06-02", "2026-06-03", "2026-06-04", "2026-06-05", "2026-06-06", "2026-06-07", "2026-06-08", "2026-06-09", "2026-06-10", "2026-06-11", "2026-06-12", "2026-06-13", "2026-06-14", "2026-06-15", "2026-06-16", "2026-06-17", "2026-06-18", "2026-06-19", "2026-06-20", "2026-06-21", "2026-06-22", "2026-06-23", "2026-06-24", "2026-06-25", "2026-06-26", "2026-06-27", "2026-06-28", "2026-06-29", "2026-06-30", "2026-07-01", "2026-07-02", "2026-07-03", "2026-07-04", "2026-07-05", "2026-07-06", "2026-07-07", "2026-07-08", "2026-07-09", "2026-07-10", "2026-07-11", "2026-07-12", "2026-07-13", "2026-07-14", "2026-07-15", "2026-07-16", "2026-07-17", "2026-07-18", "2026-07-19", "2026-07-20", "2026-07-21", "2026-07-22", "2026-07-23", "2026-07-24", "2026-07-25", "2026-07-26", "2026-07-27", "2026-07-28", "2026-07-29", "2026-07-30", "2026-07-31", "2026-08-01", "2026-08-02", "2026-08-03", "2026-08-04", "2026-08-05"],
+    datasets: [
+      {
+        label: 'CTL (长期体能)',
+        data: [38.546055, 39.61551, 38.683422, 37.773266, 38.555035, 39.153713, 38.23249, 38.674057, 40.634575, 39.678513, 38.744946, 40.609684, 40.99532, 40.03077, 40.712368, 41.801437, 40.81792, 39.857544, 40.354992, 40.958374, 41.665203, 43.555344, 44.130486, 44.527397, 44.985554, 45.385876, 45.72972, 46.04195, 47.94676, 47.995068, 48.32458, 47.187584, 47.46551, 49.336823, 49.399483, 48.237198, 48.960995, 47.809025, 46.68416, 48.76208, 51.12051, 49.917732, 48.74325, 47.596405, 47.841183, 46.71556, 47.075176, 47.33222, 47.74791, 48.012653, 46.882996, 47.238674, 46.127228, 46.31246, 45.22281, 45.17051, 45.56648, 45.38845, 44.861687, 45.123753, 44.062065, 43.59004, 42.564438, 45.680424, 46.84083, 45.738747, 44.66259, 45.117565, 45.491253, 44.42092, 45.23451, 46.311295, 46.703953, 47.063843, 47.25057, 47.55054, 47.702286, 47.85046, 48.018677, 46.888878, 45.78566, 47.5318, 46.413456, 46.827236, 45.72547, 47.84948, 46.723663, 46.471355, 47.072002, 45.964478, 46.482937],
+        borderColor: '#667eea',
+        backgroundColor: 'rgba(102,126,234,0.1)',
+        fill: false,
+        tension: 0.3,
+        pointRadius: 0,
+      },
+      {
+        label: 'ATL (短期疲劳)',
+        data: [33.35515, 40.097095, 34.759285, 30.132055, 35.572483, 39.356815, 34.117554, 37.16371, 48.4573, 42.00656, 36.41456, 47.275383, 48.569946, 42.104214, 45.68464, 51.184628, 44.370823, 38.464085, 41.46411, 44.73038, 48.227448, 58.048206, 59.37301, 59.589596, 60.17672, 60.419437, 60.3636, 60.182076, 69.07702, 66.537445, 65.93341, 57.156216, 57.401665, 66.66674, 64.71427, 56.099373, 59.147953, 51.27405, 44.44834, 56.50277, 68.81619, 59.655235, 51.713806, 44.829556, 46.582832, 40.381626, 43.25951, 45.221794, 47.85471, 49.338394, 42.770363, 45.330254, 39.295795, 41.25325, 35.76153, 36.725132, 40.089775, 39.81158, 37.57359, 40.02655, 34.69813, 33.273975, 28.844475, 48.301006, 54.517673, 47.260166, 40.968792, 44.034756, 46.293205, 40.130558, 45.30494, 51.387962, 52.93378, 54.140694, 54.255085, 55.01986, 54.884094, 54.766403, 54.7975, 47.502743, 41.179077, 51.671883, 44.793213, 47.35006, 41.04672, 53.6871, 46.54016, 45.13703, 48.713085, 42.2283, 45.65908],
+        borderColor: '#f56565',
+        backgroundColor: 'rgba(245,101,101,0.1)',
+        fill: false,
+        tension: 0.3,
+        pointRadius: 0,
+      },
+      {
+        label: 'TSB (状态)',
+        data: [5.190905000000001, -0.4815850000000026, 3.9241370000000018, 7.641210999999998, 2.9825519999999983, -0.20310199999999412, 4.114936, 1.5103469999999959, -7.822724999999998, -2.328046999999998, 2.330385999999997, -6.6656989999999965, -7.574626000000002, -2.073444000000002, -4.972272000000004, -9.383190999999997, -3.5529030000000006, 1.393459, -1.1091179999999952, -3.7720059999999975, -6.562245000000004, -14.492862000000002, -15.242524000000003, -15.062199, -15.191166000000003, -15.033560999999999, -14.633879999999998, -14.140126000000002, -21.130260000000007, -18.542377000000002, -17.608829999999998, -9.968632, -9.936155, -17.329917000000002, -15.314787000000003, -7.862175000000001, -10.186958000000004, -3.4650250000000042, 2.235819999999997, -7.740690000000001, -17.695680000000003, -9.737502999999997, -2.970555999999995, 2.7668490000000006, 1.2583509999999976, 6.333934000000006, 3.8156660000000002, 2.110425999999997, -0.10679999999999978, -1.3257410000000007, 4.112632999999995, 1.9084200000000067, 6.831433000000004, 5.05921, 9.461280000000002, 8.445377999999998, 5.4767049999999955, 5.5768699999999995, 7.2880970000000005, 5.097203, 9.363934999999998, 10.316065000000002, 13.719963000000003, -2.620581999999999, -7.676843000000005, -1.5214190000000016, 3.693798000000001, 1.0828089999999975, -0.801952, 4.290362000000002, -0.07043000000000177, -5.0766670000000005, -6.229827, -7.076851000000005, -7.004514999999998, -7.469320000000003, -7.181807999999997, -6.915942999999999, -6.778823000000003, -0.6138650000000041, 4.6065830000000005, -4.140083000000004, 1.620242999999995, -0.522824, 4.678750000000001, -5.837620000000001, 0.18350300000000175, 1.3343249999999998, -1.6410830000000018, 3.7361780000000024, 0.8238569999999967],
+        borderColor: '#48bb78',
+        backgroundColor: 'rgba(72,187,120,0.1)',
+        fill: false,
+        tension: 0.3,
+        pointRadius: 0,
+        borderDash: [5, 5],
+      },
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'bottom' } },
+    scales: {
+      x: { ticks: { maxTicksLimit: 15 } },
+      y: { title: { display: true, text: 'TSS/d' } },
+    },
+  },
+});
+
+// ── Weekly Mileage Chart ──
+const weeklyCtx = document.getElementById('weeklyChart').getContext('2d');
+new Chart(weeklyCtx, {
+  type: 'bar',
+  data: {
+    labels: ["2026-W18", "2026-W19", "2026-W20", "2026-W21", "2026-W22", "2026-W23", "2026-W24", "2026-W25", "2026-W26", "2026-W27", "2026-W28", "2026-W29", "2026-W30", "2026-W31"],
+    datasets: [{
+      label: '周跑量 (km)',
+      data: [25.3, 52.4, 55.4, 70.7, 81.9, 54.6, 52.6, 49.8, 27.9, 48.1, 57.6, 61.3, 52.9, 21.9],
+      backgroundColor: '#667eea',
+      borderRadius: 4,
+    }],
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { title: { display: true, text: 'km' } },
+    },
+  },
+});
+
+// ── HR Zone Chart ──
+const hrCtx = document.getElementById('hrChart').getContext('2d');
+const hrZones = [{"zone": "Zone 1 (Recovery)", "seconds": 59065, "pct": 25}, {"zone": "Zone 2 (Aerobic)", "seconds": 79257, "pct": 34}, {"zone": "Zone 3 (Tempo)", "seconds": 73101, "pct": 31}, {"zone": "Zone 4 (Threshold)", "seconds": 18490, "pct": 8}, {"zone": "Zone 5 (VO2max)", "seconds": 5339, "pct": 2}];
+if (hrZones.length > 0) {
+  new Chart(hrCtx, {
+    type: 'doughnut',
+    data: {
+      labels: hrZones.map(z => z.zone),
+      datasets: [{
+        data: hrZones.map(z => z.pct),
+        backgroundColor: ['#48bb78', '#4299e1', '#ecc94b', '#ed8936', '#f56565'],
+        borderWidth: 0,
+      }],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'right' },
+        tooltip: { callbacks: { label: function(c) { return c.label + ': ' + c.raw + '%'; } } },
+      },
+    },
+  });
+} else {
+  hrCtx.canvas.parentElement.style.display = 'none';
+}
+
+// ── Pace Trend Chart ──
+const paceCtx = document.getElementById('paceChart').getContext('2d');
+const paceData = [{"date": "2026-06-16", "distance_km": 21.2, "pace_sec_per_km": 365, "pace_str": "6:05/km", "name": "Afternoon \u8dd1\u6b65"}, {"date": "2026-06-20", "distance_km": 10.1, "pace_sec_per_km": 348, "pace_str": "5:48/km", "name": "Afternoon \u8dd1\u6b65"}, {"date": "2026-06-22", "distance_km": 11.3, "pace_sec_per_km": 345, "pace_str": "5:44/km", "name": "Afternoon \u8dd1\u6b65"}, {"date": "2026-06-23", "distance_km": 10.0, "pace_sec_per_km": 339, "pace_str": "5:39/km", "name": "Afternoon \u8dd1\u6b65"}, {"date": "2026-06-24", "distance_km": 10.1, "pace_sec_per_km": 332, "pace_str": "5:32/km", "name": "Evening \u8dd1\u6b65"}, {"date": "2026-06-25", "distance_km": 8.2, "pace_sec_per_km": 321, "pace_str": "5:20/km", "name": "Afternoon \u8dd1\u6b65"}, {"date": "2026-06-27", "distance_km": 10.1, "pace_sec_per_km": 326, "pace_str": "5:25/km", "name": "Afternoon \u8dd1\u6b65"}, {"date": "2026-06-29", "distance_km": 10.1, "pace_sec_per_km": 325, "pace_str": "5:25/km", "name": "Afternoon \u8dd1\u6b65"}, {"date": "2026-07-01", "distance_km": 7.6, "pace_sec_per_km": 345, "pace_str": "5:45/km", "name": "Afternoon \u8dd1\u6b65"}, {"date": "2026-07-02", "distance_km": 10.3, "pace_sec_per_km": 336, "pace_str": "5:35/km", "name": "Afternoon \u8dd1\u6b65"}, {"date": "2026-07-05", "distance_km": 10.0, "pace_sec_per_km": 383, "pace_str": "6:23/km", "name": "Evening \u8dd1\u6b65"}, {"date": "2026-07-09", "distance_km": 25.0, "pace_sec_per_km": 356, "pace_str": "5:55/km", "name": "Afternoon \u8dd1\u6b65"}, {"date": "2026-07-10", "distance_km": 13.0, "pace_sec_per_km": 328, "pace_str": "5:28/km", "name": "Evening \u8dd1\u6b65"}, {"date": "2026-07-13", "distance_km": 10.1, "pace_sec_per_km": 328, "pace_str": "5:27/km", "name": "Afternoon \u8dd1\u6b65"}, {"date": "2026-07-14", "distance_km": 10.1, "pace_sec_per_km": 317, "pace_str": "5:16/km", "name": "Afternoon \u8dd1\u6b65"}, {"date": "2026-07-16", "distance_km": 13.0, "pace_sec_per_km": 330, "pace_str": "5:30/km", "name": "Afternoon \u8dd1\u6b65"}, {"date": "2026-07-17", "distance_km": 14.3, "pace_sec_per_km": 331, "pace_str": "5:30/km", "name": "Afternoon \u8dd1\u6b65"}, {"date": "2026-07-18", "distance_km": 10.1, "pace_sec_per_km": 315, "pace_str": "5:15/km", "name": "Afternoon \u8dd1\u6b65"}, {"date": "2026-07-19", "distance_km": 10.1, "pace_sec_per_km": 325, "pace_str": "5:24/km", "name": "Evening \u8dd1\u6b65"}, {"date": "2026-07-20", "distance_km": 10.1, "pace_sec_per_km": 343, "pace_str": "5:43/km", "name": "Afternoon \u8dd1\u6b65"}, {"date": "2026-07-21", "distance_km": 10.1, "pace_sec_per_km": 337, "pace_str": "5:37/km", "name": "Afternoon \u8dd1\u6b65"}, {"date": "2026-07-22", "distance_km": 10.3, "pace_sec_per_km": 355, "pace_str": "5:55/km", "name": "Afternoon \u8dd1\u6b65"}, {"date": "2026-07-23", "distance_km": 10.3, "pace_sec_per_km": 348, "pace_str": "5:47/km", "name": "Afternoon \u8dd1\u6b65"}, {"date": "2026-07-24", "distance_km": 10.3, "pace_sec_per_km": 352, "pace_str": "5:51/km", "name": "Evening \u8dd1\u6b65"}, {"date": "2026-07-27", "distance_km": 21.6, "pace_sec_per_km": 353, "pace_str": "5:52/km", "name": "Afternoon \u8dd1\u6b65"}, {"date": "2026-07-29", "distance_km": 10.2, "pace_sec_per_km": 352, "pace_str": "5:52/km", "name": "Afternoon \u8dd1\u6b65"}, {"date": "2026-07-31", "distance_km": 21.1, "pace_sec_per_km": 341, "pace_str": "5:40/km", "name": "Evening \u8dd1\u6b65"}, {"date": "2026-08-03", "distance_km": 11.4, "pace_sec_per_km": 348, "pace_str": "5:48/km", "name": "Afternoon \u8dd1\u6b65"}, {"date": "2026-08-05", "distance_km": 10.1, "pace_sec_per_km": 334, "pace_str": "5:34/km", "name": "Afternoon \u8dd1\u6b65"}, {"date": "2026-08-05", "distance_km": 0.4, "pace_sec_per_km": 389, "pace_str": "6:29/km", "name": "Evening \u8dd1\u6b65"}];
+if (paceData.length > 0) {
+  new Chart(paceCtx, {
+    type: 'scatter',
+    data: {
+      datasets: [{
+        label: '配速 (秒/公里)',
+        data: paceData.map(p => ({ x: p.date, y: p.pace_sec_per_km })),
+        borderColor: '#ed8936',
+        backgroundColor: 'rgba(237,137,54,0.6)',
+        pointRadius: 4,
+        showLine: true,
+        tension: 0.3,
+      }],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: function(c) {
+              const d = paceData[c.dataIndex];
+              const m = Math.floor(c.raw.y / 60);
+              const s = Math.floor(c.raw.y % 60);
+              return d.name + ': ' + m + ':' + String(s).padStart(2,'0') + '/km (' + d.distance_km + 'km)';
+            }
+          }
+        },
+        legend: { display: false },
+      },
+      scales: {
+        x: { type: 'category', ticks: { maxTicksLimit: 12 }, title: { display: true, text: '日期' } },
+        y: {
+          reverse: true,
+          title: { display: true, text: '秒/公里 (越低越快)' },
+          ticks: {
+            callback: function(v) {
+              const m = Math.floor(v / 60);
+              const s = Math.floor(v % 60);
+              return m + ':' + String(s).padStart(2,'0');
+            }
+          }
+        },
+      },
+    },
+  });
+}
+</script>
+</body>
+</html>

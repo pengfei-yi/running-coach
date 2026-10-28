@@ -1,0 +1,10 @@
+{
+  "default": {
+    "athlete_id": "xx",
+    "api_key": "1xxxxx9o"
+  },
+  "friend_name": {
+    "athlete_id": "FRIEND_ATHLETE_ID",
+    "api_key": "FRIEND_API_KEY"
+  }
+}
